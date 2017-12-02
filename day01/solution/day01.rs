@@ -41,8 +41,6 @@ use std::io::Read;
 // the next. 91212129 produces 9 because the only digit that matches the next one
 // is the last digit, 9. What is the solution to your captcha?
 //
-// Your puzzle answer was 1150.
-//
 // The first half of this puzzle is complete! It provides one gold star: *
 //
 // --- Part Two ---
@@ -82,7 +80,7 @@ fn main() {
         let n2 = numbers[(idx+1)%len];
         if n1 == n2 { sum + n1 as u64 } else { sum }
     });
-    println!("Part 1: {}", sum);
+    println!("Star 1: {}", sum);
 
     // star 2:
     let half = len / 2;
@@ -90,6 +88,6 @@ fn main() {
         let n2 = numbers[(idx+half)%len];
         if n1 == n2 { sum + n1 as u64 } else { sum }
     });
-    println!("Part 2: {}", sum);
+    println!("Star 2: {}", sum);
 
 }
