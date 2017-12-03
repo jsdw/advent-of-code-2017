@@ -61,43 +61,26 @@ fn main() {
 
     let filename = env::args().nth(1).expect("need puzzle input");
 
+    // read input to string:
     let mut content = String::new();
-
     fs::File::open(filename)
         .map_err(|e| format!("{}", e))
         .expect("can't open file")
         .read_to_string(&mut content)
         .expect("can't read to string");
 
-    // Star 1:
-    let mut sum = 0;
-    for line in content.lines() {
+    // Get vector of vectors of u64s for each line:
+    let lines = content
+        .lines()
+        .map(|line| line.split_whitespace().filter_map(|s| s.parse().ok()).collect())
+        .collect::<Vec<Vec<u64>>>();
 
-        let (min,max) = line
-            .split_whitespace()
-            .filter_map(|s| s.parse().ok())
-            .fold((std::u64::MAX, std::u64::MIN), |(min,max), n| {
-                let max2 = if n > max { n } else { max };
-                let min2 = if n < min { n } else { min };
-                (min2, max2)
-            });
-
-        sum += max - min;
-    }
+    // Star 1: diff between max and min for each line:
+    let sum: u64 = lines.iter().map(|l| l.iter().max().unwrap() - l.iter().min().unwrap()).sum();
     println!("Star 1: {}", sum);
 
-    // Star 2:
-    let mut sum = 0;
-    for line in content.lines() {
-
-        let row: Vec<u64> = line
-            .split_whitespace()
-            .filter_map(|s| s.parse().ok())
-            .collect();
-
-        sum += find_even_divides(&row);
-
-    }
+    // Star 2: find perfect dividers and sum result for each line:
+    let sum: u64 = lines.iter().map(|l| find_even_divides(&l)).sum();
     println!("Star 2: {}", sum);
 
 }
@@ -113,8 +96,8 @@ fn find_even_divides(input: &[u64]) -> u64 {
 
         // if we can cleanly divide one number by the other, return the
         // result of that division..
-        if n >= first && (n / first) * first == n { return n / first };
-        if n < first && (first / n) * n == first { return first / n };
+        if n >= first && n % first == 0 { return n / first };
+        if n < first && first % n == 0 { return first / n };
 
     }
 
