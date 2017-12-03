@@ -1,10 +1,10 @@
 [package]
-name = "day02"
+name = "day03"
 version = "0.1.0"
 authors = ["James Wilson"]
 
 [[bin]]
-name = "day02"
-path = "solution/day02.rs"
+name = "day03"
+path = "solution/day03.rs"
 
 [dependencies]
