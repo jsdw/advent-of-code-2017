@@ -57,10 +57,13 @@ use std::io::Read;
 // For example:
 //
 // 1212 produces 6: the list contains 4 items, and all four digits match the digit
-// 2 items ahead. 1221 produces 0, because every comparison is between a 1 and a 2.
-// 123425 produces 4, because both 2s match each other, but no other digit has a
-// match. 123123 produces 12. 12131415 produces 4. What is the solution to your new
-// captcha?
+// 2 items ahead.
+// 1221 produces 0, because every comparison is between a 1 and a 2.
+// 123425 produces 4, because both 2s match each other, but no other digit has a match.
+// 123123 produces 12.
+// 12131415 produces 4.
+//
+// What is the solution to your new captcha?
 
 fn main() {
 
@@ -73,21 +76,17 @@ fn main() {
         .map(|b| b.unwrap() - 48)
         .collect::<Vec<u8>>();
 
-    let len = numbers.len();
-
     // star 1:
-    let sum = numbers.iter().enumerate().fold(0, |sum, (idx,&n1)| {
-        let n2 = numbers[(idx+1)%len];
-        if n1 == n2 { sum + n1 as u64 } else { sum }
-    });
-    println!("Star 1: {}", sum);
+    println!("Star 1: {}", solve(&numbers, 1));
 
     // star 2:
-    let half = len / 2;
-    let sum = numbers.iter().enumerate().fold(0, |sum, (idx,&n1)| {
-        let n2 = numbers[(idx+half)%len];
-        if n1 == n2 { sum + n1 as u64 } else { sum }
-    });
-    println!("Star 2: {}", sum);
+    println!("Star 2: {}", solve(&numbers, numbers.len() / 2));
 
+}
+
+fn solve(input: &[u8], offset: usize) -> u64 {
+    input.iter()
+        .zip(input.iter().cycle().skip(offset))
+        .map(|(&a,&b)| if a == b { a as u64 } else { 0 })
+        .sum()
 }
