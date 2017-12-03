@@ -55,9 +55,7 @@ fn get_value(input: u64) -> u64 {
     for coord in positions.skip(1) {
 
         let around = coords::surrounding(coord);
-        let value = around.iter().fold(0, |acc, coord| {
-            acc + spiral.get(coord).unwrap_or(&0u64)
-        });
+        let value = around.iter().filter_map(|coord| spiral.get(coord)).sum();
 
         if value > input {
             return value;
@@ -65,7 +63,8 @@ fn get_value(input: u64) -> u64 {
 
         spiral.insert(coord, value);
     }
-    0
+
+    unreachable!("Iterator should never end")
 }
 
 // our spiral coordinate iterator, and function to get
