@@ -4,7 +4,11 @@ version = "0.1.0"
 authors = ["James Wilson"]
 
 [[bin]]
-name = "day03"
-path = "solution/day03.rs"
+name = "day03s1"
+path = "solution/day03s1.rs"
+
+[[bin]]
+name = "day03s2"
+path = "solution/day03s2.rs"
 
 [dependencies]
