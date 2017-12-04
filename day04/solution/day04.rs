@@ -64,12 +64,7 @@ fn main() {
     // Star 1: filter phrases with dupe words; count remaining:
     let star1 = lines.iter().filter(|&line| {
         let mut used = HashSet::new();
-        for word in line {
-            if !used.insert(word) {
-                return false
-            }
-        }
-        true
+        line.iter().filter(|&word| !used.insert(word)).count() == 0
     }).count();
     println!("Star 1: {}", star1);
 
