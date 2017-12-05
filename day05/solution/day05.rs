@@ -17,19 +17,18 @@ fn main() {
     // Get vector of ints from input string:
     let lines: Vec<isize> = content.split_whitespace().filter_map(|s| s.parse().ok()).collect();
 
-    // Run the instructions, deciding how to modify each instruciton based on its curr value:
-    println!("Star 1: {}", solve(lines.clone(), |_| 1));
-    println!("Star 2: {}", solve(lines.clone(), |j| if j >= 3 { -1 } else { 1 }));
+    // Run the instructions, deciding how to modify each instruction based on its curr value:
+    println!("Star 1: {}", steps_to_finish(lines.clone(), |_| 1));
+    println!("Star 2: {}", steps_to_finish(lines, |j| if j >= 3 { -1 } else { 1 }));
 
 }
 
-fn solve<F: Fn(isize) -> isize>(mut lines: Vec<isize>, modify_given_jump: F) -> isize {
-    let mut pos: isize = 0;
-    let mut steps: isize = 0;
+fn steps_to_finish<F: Fn(isize) -> isize>(mut lines: Vec<isize>, modify_given_jump: F) -> isize {
+    let mut pos = 0;
+    let mut steps = 0;
     while pos >= 0 && pos < lines.len() as isize {
-        let idx = pos as usize;
-        let jump = lines[idx];
-        lines[idx] +=  modify_given_jump(jump);
+        let jump = lines[pos as usize];
+        lines[pos as usize] +=  modify_given_jump(jump);
         pos += jump;
         steps += 1;
     }
