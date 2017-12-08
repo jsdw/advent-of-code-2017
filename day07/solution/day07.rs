@@ -143,38 +143,29 @@ fn star1(nodes: &[Node]) -> String {
     }
 
     let mut curr: &str = &nodes[0].name;
-    loop {
-        if let Some(next) = child_to_parent.get(curr) {
-            curr = next;
-        } else {
-            break;
-        }
+    while let Some(next) = child_to_parent.get(curr) {
+        curr = next;
     }
-
     curr.to_owned()
 }
 
+// - work out the total weights and balanced states for each node.
+// - follow the !balanced states down the tree from the root until we get to
+//   a node whose children are balanced. This node is itself unbalanced.
+// - find the differing weights of the children of this unbalanced node,
+//   and return the desired weight of the bad node to rebalance the tree.
 fn star2(nodes: &[Node], root_node: &str) -> Option<isize> {
 
-    let mut by_name: HashMap<&str,&Node> = HashMap::new();
-    for node in nodes {
-        by_name.insert(&node.name, node);
-    }
-
-    // work out the total weights and balanced states for each node:
+    let by_name: HashMap<&str,&Node> = nodes.iter().map(|node| (&*node.name,node)).collect();
     sum_weights(root_node, &by_name);
 
-    // follow the !balanced states down the tree from the root until we get to
-    // a node whose children are balanced. This node is itself unbalanced.
     let mut curr = by_name[root_node];
     while let Some(name) = curr.children.iter().find(|&c| !by_name[&**c].balanced.get()) {
         curr = by_name[&**name];
     }
 
-    // find the differing weights of the children of this unbalanced node,
-    // and return the desired weight of the bad node.
-    let children: Vec<&Node> = curr.children.iter().map(|c| by_name[&**c]).collect();
-    find_balancing_weight(&children)
+    let unbalanced_children: Vec<&Node> = curr.children.iter().map(|c| by_name[&**c]).collect();
+    find_balancing_weight(&unbalanced_children)
 }
 
 // recursively sum up the node weights and balanced statuses.
@@ -202,9 +193,7 @@ fn sum_weights<'a>(name: &str, by_name: &HashMap<&str,&'a Node>) -> &'a Node {
 // and return the weight of the node that would compensate for this difference.
 // if nodes are all the same weight, returns None, as no change is needed.
 fn find_balancing_weight(vals: &[&Node]) -> Option<isize> {
-
     let mut it = vals.iter();
-
     let a = it.next()?;
     let b = it.next()?;
 
@@ -219,16 +208,13 @@ fn find_balancing_weight(vals: &[&Node]) -> Option<isize> {
             }
         }
         return None;
-    } else {
-        if let Some(c) = it.next() {
-            let c_total = c.total_weight.get();
-            if a_total == c_total {
-                return Some(a_total - (b_total - b.weight));
-            }
-        }
-        return Some(b_total - (a_total - a.weight));
     }
-
+    if let Some(c) = it.next() {
+        if a_total == c.total_weight.get() {
+            return Some(a_total - (b_total - b.weight));
+        }
+    }
+    return Some(b_total - (a_total - a.weight));
 }
 
 // turn a single line of input into a single Node:
@@ -244,7 +230,7 @@ fn parse_node(line: &str) -> Option<Node> {
     Some(Node { name, weight, children, total_weight: Cell::new(0), balanced: Cell::new(true) })
 }
 
-// a single Node:
+// a single Node. total_weight and balanced are for star 2:
 #[derive(Debug,Clone,PartialEq,Eq)]
 struct Node {
     name: String,
