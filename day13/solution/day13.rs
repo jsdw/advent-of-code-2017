@@ -14,12 +14,14 @@ fn main() {
 
     let connections: Vec<Layer> = content.lines().filter_map(parse_line).collect();
 
-    let stepped: Vec<Layer> = connections.iter().map(|l| step_position(&l, l.depth)).collect();
-    let severity: usize = stepped.iter().map(|l| if l.position == 0 { l.depth * l.range } else { 0 }).sum();
+    let severity: usize = connections.iter()
+        .map(|l| step_position(&l, l.depth))
+        .map(|l| if l.position == 0 { l.depth * l.range } else { 0 })
+        .sum();
     println!("Star 1: {}", severity);
 
     let delay: usize = (0..)
-        .filter(|&step| stepped.iter().map(|l| step_position(&l,step)).all(|l| l.position == 0))
+        .filter(|&step| connections.iter().map(|l| step_position(&l, l.depth + step)).all(|l| l.position == 0))
         .next()
         .unwrap();
     println!("Star 2: {}", delay);
