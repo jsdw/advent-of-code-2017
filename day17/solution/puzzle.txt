@@ -29,8 +29,6 @@ Perhaps, if you can identify the value that will ultimately be after the last va
 
 What is the value after 2017 in your completed circular buffer?
 
-Your puzzle answer was 1561.
-
 --- Part Two ---
 
 The spinlock does not short-circuit. Instead, it gets more angry. At least, you assume that's what happened; it's spinning significantly faster than it was a moment ago.
@@ -42,3 +40,5 @@ The good news is that you have improved calculations for how to stop the spinloc
 The bad news is that while you were determining this, the spinlock has just finished inserting its fifty millionth value (50000000).
 
 What is the value after 0 the moment 50000000 is inserted?
+
+Your puzzle input was 382.
