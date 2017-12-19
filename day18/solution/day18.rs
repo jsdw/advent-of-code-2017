@@ -53,6 +53,7 @@ fn main() {
                 break;
             }
         }
+        println!("Star 2: {}", a_sent);
     }
 
 }
