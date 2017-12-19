@@ -33,19 +33,19 @@ fn main() {
     // star 2:
     {
         use star2::*;
-        let mut a_sent = 0;
+        let mut b_sent = 0;
         let mut a = State::new(Registers::new().with_val('p',0), &commands);
         let mut b = State::new(Registers::new().with_val('p',1), &commands);
 
         loop {
             let step_a = a.step();
             if let Res::Send(val) = step_a {
-                a_sent += 1;
                 b.recieve(val);
             }
 
             let step_b = b.step();
             if let Res::Send(val) = step_b {
+                b_sent += 1;
                 a.recieve(val);
             }
 
@@ -53,7 +53,7 @@ fn main() {
                 break;
             }
         }
-        println!("Star 2: {}", a_sent);
+        println!("Star 2: {}", b_sent);
     }
 
 }
@@ -94,7 +94,7 @@ pub enum Command {
     Mul(Register, Val),
     Mod(Register, Val),
     Rcv(Register),
-    Jgz(Register, Val)
+    Jgz(Val, Val)
 }
 
 #[derive(Debug,Copy,Clone,Eq,PartialEq)]
@@ -108,7 +108,8 @@ type Register = char;
 fn parse_command(s: &str) -> Option<Command> {
     let mut bits = s.split_whitespace();
     let cmd = bits.next()?;
-    let reg = bits.next()?.chars().next()?;
+    let snd = bits.next()?;
+    let reg = snd.chars().next()?;
     let val = bits.next().and_then(parse_val);
 
     Some(match cmd {
@@ -118,7 +119,7 @@ fn parse_command(s: &str) -> Option<Command> {
         "mul" => Mul(reg, val?),
         "mod" => Mod(reg, val?),
         "rcv" => Rcv(reg),
-        "jgz" => Jgz(reg, val?),
+        "jgz" => Jgz(parse_val(snd)?, val?),
         _ => return None
     })
 }
@@ -187,8 +188,8 @@ mod star1 {
                         return Res::Finished
                     }
                 },
-                Jgz(reg, val) => {
-                    if self.registers.get_reg(&reg) > 0 {
+                Jgz(test, val) => {
+                    if self.registers.get_val(test) > 0 {
                         let v = self.registers.get_val(val);
                         next = v;
                     }
@@ -278,8 +279,8 @@ pub mod star2 {
                         return Res::Stopped;
                     }
                 },
-                Jgz(reg, val) => {
-                    if self.registers.get_reg(&reg) > 0 {
+                Jgz(test, val) => {
+                    if self.registers.get_val(test) > 0 {
                         let v = self.registers.get_val(val);
                         next = v;
                     }
