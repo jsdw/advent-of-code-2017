@@ -43,31 +43,15 @@ impl <'a> Runner<'a> {
         Runner { map, pos: (x as isize, 0), direction: Down, finished: false }
     }
     fn step(&mut self) {
-        if self.finished {
-            return
-        }
+        if self.finished { return }
 
-        let d = self.direction;
-        let next_pos = d.next_coords(self.pos);
-        if !self.map.get(next_pos).unwrap_or(Empty).empty() {
-            self.pos = next_pos;
-            return
-        }
-
-        let d = self.direction.turn_left();
-        let next_pos = d.next_coords(self.pos);
-        if !self.map.get(next_pos).unwrap_or(Empty).empty() {
-            self.pos = next_pos;
-            self.direction = d;
-            return
-        }
-
-        let d = self.direction.turn_right();
-        let next_pos = d.next_coords(self.pos);
-        if !self.map.get(next_pos).unwrap_or(Empty).empty() {
-            self.pos = next_pos;
-            self.direction = d;
-            return
+        for &d in &[self.direction, self.direction.r(), self.direction.r().r().r()] {
+            let next_pos = d.next_coords(self.pos);
+            if !self.map.get(next_pos).unwrap_or(Empty).is_empty() {
+                self.pos = next_pos;
+                self.direction = d;
+                return
+            }
         }
 
         self.finished = true;
@@ -98,15 +82,7 @@ enum Direction {
     Up
 }
 impl Direction {
-    fn turn_left(&self) -> Direction {
-        match *self {
-            Right => Up,
-            Down => Right,
-            Left => Down,
-            Up => Left
-        }
-    }
-    fn turn_right(&self) -> Direction {
+    fn r(&self) -> Direction {
         match *self {
             Right => Down,
             Down => Left,
@@ -149,11 +125,12 @@ enum Piece {
     Road,
     Empty
 }
+
 impl Piece {
     fn letter(&self) -> Option<char> {
         if let Letter(c) = *self { Some(c) } else { None }
     }
-    fn empty(&self) -> bool {
+    fn is_empty(&self) -> bool {
         if let Empty = *self { true } else { false }
     }
 }
