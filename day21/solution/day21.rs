@@ -58,7 +58,8 @@ fn expand_rule((input,output): (Grid,Grid)) -> Vec<(Grid,Grid)> {
     let input_f_180 = input_f_90.rot();
     let input_f_270 = input_f_180.rot();
 
-    vec![ input,input_90,input_180,input_270,input_f,input_f_90,input_f_180,input_f_270 ]
+    vec![ input,   input_90,   input_180,   input_270
+        , input_f, input_f_90, input_f_180, input_f_270 ]
         .into_iter()
         .map(|i| (i,output.clone()))
         .collect()
