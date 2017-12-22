@@ -187,11 +187,8 @@ mod square {
     // Coords is an iterator over a set of coordinates in some square.
     // we can set the initial coord offset, and the jump amount. This
     // makes it useful for everything to do with subsquares.
-    #[derive(Debug,Clone,Copy,Eq,PartialEq,Hash)]
     struct Coords {
-        x: usize,
-        y: usize,
-        size: usize,
+        iter: Box<Iterator<Item=(usize,usize)>>,
         offset_x: usize,
         offset_y: usize,
         jump: usize
@@ -199,11 +196,17 @@ mod square {
 
     impl Coords {
         fn new(size: usize) -> Coords {
-            Coords { x:0, y:0, jump:1, offset_x:0, offset_y:0, size }
+            let iter = (0..size).flat_map(move |y| (0..size).map(move |x| (x,y)));
+            Coords {
+                iter: Box::new(iter),
+                jump:1,
+                offset_x:0,
+                offset_y:0
+            }
         }
-        fn offset(mut self, offset_x: usize, offset_y: usize) -> Coords {
-            self.offset_x = offset_x;
-            self.offset_y = offset_y;
+        fn offset(mut self, x: usize, y: usize) -> Coords {
+            self.offset_x = x;
+            self.offset_y = y;
             self
         }
         fn jump(mut self, j: usize) -> Coords {
@@ -215,20 +218,7 @@ mod square {
     impl Iterator for Coords {
         type Item = (usize,usize);
         fn next(&mut self) -> Option<Self::Item> {
-            let (x,y) = (self.x, self.y);
-
-            if self.x < self.size - 1 {
-                self.x += 1;
-            } else if self.y < self.size {
-                self.y += 1;
-                self.x = 0;
-            }
-
-            if y < self.size {
-                Some( (x*self.jump+self.offset_x, y*self.jump+self.offset_y) )
-            } else {
-                None
-            }
+            self.iter.next().map(|(x,y)| (x*self.jump+self.offset_x, y*self.jump+self.offset_y))
         }
     }
 
