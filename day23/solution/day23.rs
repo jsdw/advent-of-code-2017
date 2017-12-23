@@ -1,3 +1,5 @@
+extern crate primal;
+
 use std::env;
 use std::fs;
 use std::io::Read;
@@ -27,21 +29,16 @@ fn main() {
     }
     println!("Star 1: {}", mul_seen);
 
-    let mut b: i64 = 84 * 100 - 100000;
-    let c: i64 = b - 17000;
-    let mut h = 0;
-    loop {
-        let d = b + 1;
-        if d * d - b == 0 {
-            h = h - 1;
+    let max = 125400;
+    let mut n = 108400;
+    let mut non_primes = 0;
+    while n <= max {
+        if !primal::is_prime(n) {
+            non_primes += 1;
         }
-
-        if b - c == 0 {
-            break;
-        }
-        b = b - 17;
+        n += 17;
     }
-    println!("Star 2: {}", h);
+    println!("Star 2: {}", non_primes);
 
 }
 

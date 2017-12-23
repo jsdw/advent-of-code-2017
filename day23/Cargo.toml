@@ -8,3 +8,4 @@ name = "day23"
 path = "solution/day23.rs"
 
 [dependencies]
+primal = "0.2.3"
