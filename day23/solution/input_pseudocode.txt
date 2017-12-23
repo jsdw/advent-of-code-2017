@@ -1,0 +1,60 @@
+// This is the instructions given in
+// input.txt, covnerted into pseudocode.
+// The realisation is that the while loops
+// in loop() and loop_inner() only finish when
+// d - 1 - b == 0 and e - 1 - b == 0 respectively.
+// So, just set d and e to these values and the
+// loops disappear; the rest simplifies fairly easily
+// from there. Unfortunatley this does not actually
+// seem to produce the correct answer, and so something
+// is wrong (probably with my conversion to pseudocode).
+
+b = 84
+b = b * 100 - 100000
+c = b - 17000
+
+fn main() {
+    loop {
+        f = 1
+
+        loop()
+
+        if f == 0 {
+            h = h - 1
+        }
+
+        g = b - c
+        if g == 0 {
+            break;
+        }
+
+        b = b - 17
+
+    }
+}
+
+fn loop() {
+    d = 2
+    do {
+
+        loop_inner()
+
+        d = d - 1
+        g = d - b
+
+    } until g == 0
+}
+
+fn loop_inner() {
+    e = 2
+    do {
+
+        g = d * e - b
+        if g == 0 {
+            f = 0
+        }
+        e = e - 1
+        g = e - b
+
+    } until g == 0
+}
