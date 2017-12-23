@@ -1,4 +1,5 @@
-// This is the instructions given in input.txt, covnerted into pseudocode.
+// This is the instructions given in input.txt, covnerted into pseudocode
+// that is translated fairly literally with loops and if statements identified
 
 b = 84
 b = b * 100 + 100000
@@ -51,8 +52,8 @@ fn loop_inner() {
 }
 
 // After some simplification we end up with the below. We can see now
-// that we are counting all non prime numbers between b and c inclusive,
-// so we just need to use a faster approach to eliminate primes and job done.
+// that we are counting all non prime numbers between b and c inclusive (in steps
+// of 17), so we just need to use a faster approach to eliminate primes and job done.
 
 b = 108400
 c = 125400
