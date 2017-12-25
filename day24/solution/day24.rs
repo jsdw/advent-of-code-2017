@@ -15,10 +15,8 @@ fn main() {
 
     let pieces: Vec<Piece> = content.lines().filter_map(parse_piece).collect();
 
-    // build all possible bridges and summarise some stats:
-    let bridges = build_bridges(&pieces);
-    let stats: Vec<(usize,isize)> = bridges
-        .into_iter()
+    // iterate over possible bridges as they are found and summarise:
+    let stats: Vec<(usize,isize)> = DFS::new(&pieces)
         .map(|bridge| (bridge.len(), bridge.iter().map(|&(a,b)| a+b).sum()))
         .collect();
 
@@ -33,71 +31,70 @@ fn main() {
 
 }
 
-fn build_bridges(pieces: &[Piece]) -> Vec<Vec<Piece>> {
-
-    // we start with any bridges with a 0 in, putting the 0 first.
-    let mut search_space: Vec<Vec<Piece>> = pieces.iter()
-        .filter(|&&(a,b)| a == 0 || b == 0)
-        .map(|&(a,b)| vec![if a == 0 { (a,b) } else { (b,a) }])
-        .collect();
-
-    // create a table to easily find available bridges given some port:
-    let mut pieces_hash = PieceHash::new();
-    pieces.iter().for_each(|piece| pieces_hash.insert_piece(piece));
-
-    // searching expands the search space until bridges are built, then putting
-    // them into finished instead. keep going until nothing left to search.
-    let mut finished = vec![];
-    while search_space.len() > 0 {
-        search_step(&mut search_space, &mut finished, &pieces_hash);
-    }
-    finished
+// Our depth-first searcher allows us to stream 
+// search results as they become available. Iteration
+// pulls from the finished list, and if it becomes empty
+// runs search_steps until it's populated again, until our
+// search_space is exhausted.
+struct DFS {
+    search_space: Vec<Vec<Piece>>,
+    finished: Vec<Vec<Piece>>,
+    pieces: PieceHash
 }
+impl DFS {
+    fn new(pieces: &Vec<Piece>) -> DFS {
+        // we start with any bridges with a 0 in, putting the 0 first.
+        let search_space: Vec<Vec<Piece>> = pieces.iter()
+            .filter(|&&(a,b)| a == 0 || b == 0)
+            .map(|&(a,b)| vec![if a == 0 { (a,b) } else { (b,a) }])
+            .collect();
 
-fn search_step(search_space: &mut Vec<Vec<Piece>>, finished: &mut Vec<Vec<Piece>>, pieces: &PieceHash) {
-    let mut current = vec![];
-    ::std::mem::swap(search_space, &mut current);
+        // create a table to easily find available bridges given some port:
+        let mut pieces_hash = PieceHash::new();
+        pieces.iter().for_each(|piece| pieces_hash.insert_piece(piece));
 
-    for bridge in current {
+        DFS {
+            pieces: pieces_hash,
+            finished: vec![],
+            search_space
+        }
+    }
+    fn search_step(&mut self) {
+        let bridge = if let Some(b) = self.search_space.pop() { b } else { return };
 
         // The last port number is the one we need to match:
         let &(_,b) = bridge.last().unwrap();
 
         // find all valid next pieces; remove any for which their
         // available count has already been used:
-        let matches: Vec<Piece> = pieces
-            .matches_for(b)
-            .into_iter()
-            .filter(|&(piece,count)|{
-                bridge.iter().filter(|&&(a,b)| (a,b) == piece || (b,a) == piece).count() < count
-            })
+        let matches: Vec<Piece> = self.pieces
+            .matches_for(b).into_iter()
+            .filter(|&(p,c)| bridge.iter().filter(|&&(a,b)| (a,b) == p || (b,a) == p).count() < c)
             .map(|(piece,_)| piece)
             .collect();
 
-        // no matches? the bridge is done.
+        // bridge finished if no matches, else push new bridges
+        // into our search space.
         if matches.len() == 0 {
-            finished.push(bridge);
-            continue;
-        }
-
-        // matches? expand our search space.
-        for piece in matches {
-            let mut new = bridge.clone();
-            new.push(piece);
-            search_space.push(new);
+            self.finished.push(bridge);
+        } else {
+            for piece in matches {
+                let mut new = bridge.clone();
+                new.push(piece);
+                self.search_space.push(new);
+            }
         }
     }
 }
-
-// parse a string like "18/22" into a tuple of (18,22):
-fn parse_piece(s: &str) -> Option<Piece> {
-    let mut bits = s.split('/');
-    let a = bits.next()?.parse().ok()?;
-    let b = bits.next()?.parse().ok()?;
-    Some((a,b))    
+impl Iterator for DFS {
+    type Item = Vec<Piece>;
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.search_space.len() > 0 && self.finished.len() == 0 {
+            self.search_step();
+        }
+        self.finished.pop()
+    }
 }
-
-type Piece = (isize,isize);
 
 // A basic struct for storing knowledge about a tupple of two ports which
 // can be used either way around. We use it to find pieces that match some
@@ -121,3 +118,13 @@ impl PieceHash {
             .unwrap_or(vec![])
     }
 }
+
+// Parse our pieces: parse a string like 
+// "18/22" into a tuple of (18,22):
+fn parse_piece(s: &str) -> Option<Piece> {
+    let mut bits = s.split('/');
+    let a = bits.next()?.parse().ok()?;
+    let b = bits.next()?.parse().ok()?;
+    Some((a,b))    
+}
+type Piece = (isize,isize);
